@@ -37,16 +37,47 @@
 
 
 
-int bigger_number(void * arg){
+
+
+
+int bigger_number(void * arg, int multiplier, int[] values){
+   thread_arg s = (thread_arg *) arg;
    
+   if (values[s.startIndex] < values[multiplier*s.endIndex]){
+     values[s.startIndex] = values[multiplier*s.endIndex];
+  }
    
   return 1;
   
 }
 
-
-
 int main() {
+   
+    //general strucutre
+    
+    //Stardard in
+  
+    //initialize array of size p
+    //pthread_t [8000];
+  
+    //initialize various attributes. Initializes them for a set of standard.
+    //pthread_attr_t (what is this lol look up documentation)
+    
+    //pthread_attr_init[]
+  
+    //pthread_create() //creates threads to do actual part of the process
+  
+    //pthread_join() //main thread waits for all sub threads to terminate.
+  
+    pthread_t[8000];
+    pthread_t attr;
+    pthread_t_init(&attr);
+    
+    pthread_arg arg[num_threads];
+    
+   
+    
+  
   
   
   return 0;
