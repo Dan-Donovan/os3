@@ -47,19 +47,33 @@ int bigger_number(void * arg, int multiplier, int[] values){
      values[s.startIndex] = values[multiplier*s.endIndex];
   }
    
-  return 1;
+  
   
 }
 
 int main() {
    
     //general strucutre
-    
+    int arr [8000];
     //Stardard in
-  
+    int count = 0;
+    cout << "Enter number: ";
+    string input;
+    while (getline(cin, input) && input[0] != '\0')
+    {
+      int value = (int) input;
+      
+      cout << input << endl;
+      arr[count] = value;
+      input = "";	
+      count += 1;
+      cout << "Enter number: ";
+    }
+    
+     
     //initialize array of size p
     //pthread_t [8000];
-  
+    
     //initialize various attributes. Initializes them for a set of standard.
     //pthread_attr_t (what is this lol look up documentation)
     
@@ -67,16 +81,19 @@ int main() {
   
     //pthread_create() //creates threads to do actual part of the process
   
-    //pthread_join() //main thread waits for all sub threads to terminate.
-  
-    pthread_t[8000];
-    pthread_t attr;
-    pthread_t_init(&attr);
-    
-    pthread_arg arg[num_threads];
-    
-   
-    
+//     //pthread_join() //main thread waits for all sub threads to terminate.
+//   
+//   
+//   
+//     pthread_t[8000];
+//     pthread_attr_t attr;
+//     pthread_t_init(&attr);
+//       
+//     
+//     pthread_arg arg[num_threads];
+//     
+// 
+//     
   
   
   
