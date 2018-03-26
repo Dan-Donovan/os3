@@ -46,14 +46,14 @@ pthread_barrier_t mybarrier;
 //Barrier barr;
 
 class Barrier{
-  
-  int value;
-  sem_t mutex;
-  sem_t waitq; //first time want to wait
-  sem_t throttle;
-  int init;
-  
+    
 public:
+    int value;
+    sem_t mutex;
+    sem_t waitq; //first time want to wait
+    sem_t throttle;
+    int init;
+
     void setupBS(); 
     void set_init(int);
     void set_val(int);
@@ -62,11 +62,11 @@ public:
 
 void Barrier::set_init(int num){
   init = num;
-  cout << "init for barrier is " << init;
+  //cout << "init for barrier is " << init << endl;
   }
 void Barrier::set_val(int num){
   value = num;
-  cout << "value for barrier is " << value;
+  //cout << "value for barrier is " << value << endl;
   }
 void Barrier::setupBS(){
   sem_init(&mutex,0,1);
@@ -79,6 +79,7 @@ void Barrier:: wait(){
   sem_wait(&mutex);
   cout << "first wait is working after the mutex!" << endl;
   value--;
+  cout << "the current value after subtracting is " << value << endl;
   if(value != 0){
 //     mutex.signal();
 //     waitq.wait();
@@ -87,20 +88,24 @@ void Barrier:: wait(){
     sem_post(&mutex);
     cout << " made it here OKAY OKAY" << endl;
     sem_wait(&waitq);
+    cout << "sem wait has changed after the second wait() call" << endl;
     sem_post(&throttle);
     
   }
   
   else{
+    cout << "we are now in the else statement since all threads have finished" << endl;
     for (int i = 0; i < init -1; i++){
 //       waitq.signal();
 //       throttle.wait();
       sem_post(&waitq);
       sem_wait(&throttle);
     }
-   value = init;
+    cout << "made it through for loop :) " << endl;
+  // value = init;
+    set_val(init);
 //    mutex.signal();
-   cout << "------------------------" << endl;
+  // cout << "------------------------" << endl;
    sem_post(&mutex);
    cout << "end of wait??" <<endl;
   }
@@ -109,19 +114,19 @@ void Barrier:: wait(){
 
 
 void * bigger_number(void * arg){
-  cout << "inside the belly of the beast" << endl;
+  //cout << "inside the belly of the beast" << endl;
    pthread_arg * s = (pthread_arg *) arg;
    //int multiplier = s->multiplier;
    cout << s->startIndex << "end " << s->endIndex << endl;
    if (arr[s->startIndex] < arr[s->endIndex]){
-     cout << "here lol " << endl;
+    // cout << "here lol " << endl;
      cout << arr[s->startIndex] << "next" << arr[s->endIndex] << endl;
      arr[s->startIndex] = arr[s->endIndex];
   }
-  cout << "here?" << endl;
+  //cout << "here?" << endl;
   cout << "resulting VALUE is " << arr[s->startIndex] << endl;
   //pthread_barrier_wait(&mybarrier);
-  cout << "actually going!" << endl;
+ /// cout << "actually going!" << endl;
   //barr.wait();
   return 0;
 }
@@ -136,9 +141,7 @@ void * bigger_number(void * arg){
 
 int main() {
    
-    //general strucutre
-    //int arr [8200];
-    //Stardard in
+
     int count = 0;
     string s;
     arr =  (int *) malloc(sizeof(int)*8200);
@@ -156,7 +159,6 @@ int main() {
        int value = 0;
        example >> value;
        arr[count] = value;
-     // int value = stoi(input);
       count += 1;
      }
      
@@ -182,7 +184,7 @@ int main() {
       limit++;
     }
     
-    cout << "count is " << count << " limit is " << limit << endl;
+    //cout << "count is " << count << " limit is " << limit << endl;
     
     cout << "----------------------------" << endl;
     for(int i = 0; i < limit; i++){
@@ -194,15 +196,16 @@ int main() {
 	if (  (2*k) % (int) pow(2.0,(double)(i+1)) == 0.0){
 	  arg[k].startIndex = 2*k;
 	  arg[k].endIndex = 2*k + (int) pow(2.0,(double)i);
-	  cout << arg[k].startIndex << "This is the start index" << endl;
+	//  cout << arg[k].startIndex << "This is the start index" << endl;
 	  //arg[i].multiplier = i;
 	  if (i == 0){
 	    cout << "CREATING NEW THREAD" << endl;
 	    pthread_create(&tid[k], &attr,bigger_number,&arg[k]);
-	    cout << "something is wrong" << endl;
+	    
+	  //  cout << "something is wrong" << endl;
 	  }
 	  else{
-	    cout << "using same threads" << endl;
+	    cout << "using old threads" << endl;
 	   bigger_number(&arg[k]); 
 	  }
 	}
@@ -218,20 +221,19 @@ int main() {
 // 	    cout << "using same dummy threads" << endl;
 // 	   fake(&arg[k]);
 // 	  }
-	  cout << "These threads arent doing anything" << endl;  
+	  cout << "Thread is doing no calculations" << endl;  
 	  
 	}
-	//barrier
+
 // 	usleep(3000000);
-// 	cout << "no way jose" << endl;
-	
-	
+
+	barr.wait();
       }
-   //  cout << barr.value << " This is the bar value. " << endl;
-     barr.wait();
+    
+     
       
     }
-    cout << "what the heck? " << endl;
+    cout << "---------------- " << endl;
     
     for (int j = 0; j < count / 2; j++){
       pthread_join(tid[j], NULL);
