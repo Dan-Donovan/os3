@@ -8,6 +8,7 @@ typedef struct __attribute__ ((packed)) {
   //int id;
   int startIndex;
   int endIndex;
+  int multiplier;
 } pthread_arg;
 
 

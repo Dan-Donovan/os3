@@ -40,24 +40,24 @@ using namespace std;
 
 /* Global Declarations */
 
+int arr [8200];
 
 
 
 
 
 
-
-void bigger_number(void * arg){
-   thread_arg s = (thread_arg *) arg;
-   
-   if (arr[s.startIndex] < arr[multiplier*s.endIndex]){
-     arr[s.startIndex] = arr[multiplier*s.endIndex];
+void * bigger_number(void * arg){
+   pthread_arg * s = (pthread_arg *) arg;
+   int multiplier = s->multiplier;
+   if (arr[s->startIndex] < arr[multiplier*s->endIndex]){
+     arr[s->startIndex] = arr[multiplier*s->endIndex];
   }
    
   
   
 }
-int arr [8200];
+
 
 int main() {
    
@@ -65,17 +65,25 @@ int main() {
     //int arr [8200];
     //Stardard in
     int count = 0;
-    cout << "Enter number: ";
+    string s;
    // string input;
-    while (getline(cin, arr[count]) && input[0] != '\0')
+    bool cont = true;
+    while (cont == true)
     {
+     cout << "Enter number: ";
+     getline(cin, s);
+     if (s.empty()){
+       cont = false;
+     }
+     else{
+       stringstream example(s);
+       int value = 0;
+       example >> value;
+       arr[count] = value;
      // int value = stoi(input);
-      
-     // cout << input << endl;
-     // arr[count] = value;
-      //input = "";	
       count += 1;
-      cout << "Enter number: ";
+     }
+     
     }
     
     pthread_t tid[count];
@@ -93,9 +101,10 @@ int main() {
     
     for(int i = 0; i < limit; i++){
       
-      if ( i % pow(2.0,(double)(i+1)) == 0){
+      if (  i % (int) pow(2.0,(double)(i+1)) == 0.0){
 	arg[i].startIndex = i;
 	arg[i].endIndex = i + pow(2.0,(double)i);
+	arg[i].multiplier = i;
 	pthread_create(&tid[i], &attr,bigger_number,&arg[i]);
       }
       
