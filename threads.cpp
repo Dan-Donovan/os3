@@ -29,6 +29,7 @@
 #include "threads.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <cstddef>
 #include <iostream>
 #include <sstream>
 #include <pthread.h>
@@ -77,20 +78,25 @@ int main() {
       cout << "Enter number: ";
     }
     
-    pthread_t [count];
+    pthread_t tid[count];
     pthread_attr_t attr;
-    pthread_attr_init(attr);
+    pthread_attr_init(&attr);
     
-    pthread_arg = arg[count];
+    pthread_arg arg[count];
     
-    int limit = log(count)
+    int log_count = count;
+    int limit = 0;
+    void * dummy;
+    while(log_count >>= 1){
+      limit++;
+    }
     
     for(int i = 0; i < limit; i++){
       
-      if ( i % pow(2,(n+1)) == 0){
+      if ( i % pow(2.0,(double)(i+1)) == 0){
 	arg[i].startIndex = i;
-	arg[i].endIndex = i + pow(2,n)
-	pthread_create(&t[i], &attr,bigger_number(),&arg[i])
+	arg[i].endIndex = i + pow(2.0,(double)i);
+	pthread_create(&tid[i], &attr,bigger_number,&arg[i]);
       }
       
       //barrier
@@ -99,7 +105,7 @@ int main() {
     }
     
     for (int j = 0; j < count; j++){
-      p_thread_join(t[i], 0)
+      pthread_join(tid[j], NULL);
     }
     
     cout << arr[0] << endl;
