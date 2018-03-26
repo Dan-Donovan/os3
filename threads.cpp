@@ -43,34 +43,68 @@ using namespace std;
 
 int * arr;
 pthread_barrier_t mybarrier;
-
+//Barrier barr;
 
 class Barrier{
+  
   int value;
-  sem_t mutex(1);
-  sem_t waitq(0); //first time want to wait
-  sem_t throttle(0);
-  int init;  
-}
+  sem_t mutex;
+  sem_t waitq; //first time want to wait
+  sem_t throttle;
+  int init;
+  
+public:
+    void setupBS(); 
+    void set_init(int);
+    void set_val(int);
+    void wait();
+};
 
+void Barrier::set_init(int num){
+  init = num;
+  cout << "init for barrier is " << init;
+  }
+void Barrier::set_val(int num){
+  value = num;
+  cout << "value for barrier is " << value;
+  }
+void Barrier::setupBS(){
+  sem_init(&mutex,0,1);
+  sem_init(&waitq,0,0);
+  sem_init(&throttle,0,0);
+  }
 void Barrier:: wait(){
-  mutex.wait();
+  //mutex.wait();
+  cout << "in the wait method! oh boy" << endl;
+  sem_wait(&mutex);
+  cout << "first wait is working after the mutex!" << endl;
   value--;
   if(value != 0){
-    mutex.signal();
-    waitq.signal();
-    throttle.signal();
+//     mutex.signal();
+//     waitq.wait();
+//     throttle.signal();
+    cout << "testing if sem_post is proper" << endl;
+    sem_post(&mutex);
+    cout << " made it here OKAY OKAY" << endl;
+    sem_wait(&waitq);
+    sem_post(&throttle);
+    
   }
   
   else{
     for (int i = 0; i < init -1; i++){
-      waitq.signal();
-      throttle.wait();
+//       waitq.signal();
+//       throttle.wait();
+      sem_post(&waitq);
+      sem_wait(&throttle);
     }
    value = init;
-   mutex.signal();
+//    mutex.signal();
+   cout << "------------------------" << endl;
+   sem_post(&mutex);
+   cout << "end of wait??" <<endl;
   }
-  
+  cout << "done waiting perchance? " << endl;
 }
 
 
@@ -88,6 +122,7 @@ void * bigger_number(void * arg){
   cout << "resulting VALUE is " << arr[s->startIndex] << endl;
   //pthread_barrier_wait(&mybarrier);
   cout << "actually going!" << endl;
+  //barr.wait();
   return 0;
 }
 
@@ -132,6 +167,12 @@ int main() {
     pthread_attr_init(&attr);
     
     pthread_arg arg[count / 2];
+    
+    Barrier barr;
+    barr.set_init(count / 2);
+    barr.set_val(count / 2);
+    barr.setupBS();
+    
     pthread_barrier_t mybarrier;
     pthread_barrier_init(&mybarrier, NULL, (count /2) - 1);
     int log_count = count;
@@ -145,6 +186,8 @@ int main() {
     
     cout << "----------------------------" << endl;
     for(int i = 0; i < limit; i++){
+      barr.set_init(count / 2);
+      barr.setupBS();
       cout << "i equals " << i << endl;
       for(int k = 0; k < count / 2; k++){
 	
@@ -179,11 +222,13 @@ int main() {
 	  
 	}
 	//barrier
-	usleep(3000000);
-	cout << "no way jose" << endl;
+// 	usleep(3000000);
+// 	cout << "no way jose" << endl;
+	
 	
       }
-     
+   //  cout << barr.value << " This is the bar value. " << endl;
+     barr.wait();
       
     }
     cout << "what the heck? " << endl;
