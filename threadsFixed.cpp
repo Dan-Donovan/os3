@@ -51,7 +51,7 @@ class Barrier{
 public:
     int value;
     sem_t mutex;
-    sem_t waitq; //first time want to wait
+    sem_t waitq;
     sem_t throttle;
     int init;
 
@@ -76,41 +76,32 @@ void Barrier::setupBS(){
   }
 void Barrier:: wait(){
   
-  //cout << "in the wait method! oh boy" << endl;
   sem_wait(&mutex);
-  //cout << "first wait is working after the mutex!" << endl;
   value--;
-  //cout << "the current value after subtracting is " << value << endl;
   if(value != 0){
 //     mutex.signal();
 //     waitq.wait();
 //     throttle.signal();
-    //cout << "testing if sem_post is proper" << endl;
     sem_post(&mutex);
-    //cout << " made it here OKAY OKAY" << endl;
     sem_wait(&waitq);
-    //cout << "sem wait has changed after the second wait() call" << endl;
     sem_post(&throttle);
     
   }
   
   else{
-   // cout << "we are now in the else statement since all threads have finished" << endl;
     for (int i = 0; i < init -1; i++){
 //       waitq.signal();
 //       throttle.wait();
       sem_post(&waitq);
       sem_wait(&throttle);
     }
-    //cout << "made it through for loop :) " << endl;
   // value = init;
     set_val(init);
 //    mutex.signal();
-  // cout << "------------------------" << endl;
+
    sem_post(&mutex);
-   //cout << "end of wait??" <<endl;
   }
- // cout << "done waiting perchance? " << endl;
+ 
 }
 
 Barrier * barr;
@@ -132,35 +123,30 @@ void * bigger_number(void * arg){
 	  int startIndex = 2*tid;
 	  int endIndex = 2*tid + (int) pow(2.0,(double)i);
 
-	   cout << startIndex << "end " << endIndex << endl;
+	   //cout << "Starting index " << startIndex << "Ending index " << endIndex << endl;
 	   if (arr[startIndex] < arr[endIndex]){
-	    // cout << "here lol " << endl;
-	    cout << arr[startIndex] << "next" << arr[endIndex] << endl;
 	    arr[startIndex] = arr[endIndex];
 	      }
 	}
       barr->wait();
-      //pthread_barrier_wait(&mybarrier);
-   //   cout << "after barrier" << endl;
+      
     }
- /// cout << "actually going!" << endl;
-  //barr.wait();
+
   
 }
 
 
 int main() {
    
-
     count = 0;
     thread_count = 0;
-    string s;
     arr =  (int *) malloc(sizeof(int)*8200);
-   // string input;
+    
+    string s;
     bool cont = true;
     while (cont == true)
     {
-     cout << "Enter number: ";
+    // cout << "Enter number: ";
      getline(cin, s);
      if (s.empty()){
        cont = false;
@@ -172,32 +158,30 @@ int main() {
        arr[count] = value;
       count += 1;
      }
-     
-    }
+   }
+   
     thread_count = count /2;
     pthread_t tid[thread_count];
     pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    
+    pthread_attr_init(&attr); 
     pthread_arg arg[thread_count];
     
     barr = new Barrier();
     barr->set_init(thread_count);
     barr->set_val(thread_count);
     barr->setupBS();
-    cout << "----------------------------" << endl;
     
     for(int k = 0; k < count / 2; k++){
       arg[k].id = k;
       pthread_create(&tid[k], &attr,bigger_number,&arg[k]);
     }
     
+    
     for (int j = 0; j < count / 2; j++){
       pthread_join(tid[j], NULL);
     }
-    
-      
-    cout << "the biggest element is " << arr[0] << endl;
+   
+    cout << arr[0] << endl;
     
     return 0;
     }
