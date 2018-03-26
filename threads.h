@@ -20,7 +20,7 @@ typedef struct __attribute__ ((packed)) {
 } dirEnt;*/
 
 
-extern int int bigger_number(void * arg);
+extern void bigger_number(void * arg);
 
 
 
