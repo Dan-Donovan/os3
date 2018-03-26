@@ -40,7 +40,7 @@ using namespace std;
 
 /* Global Declarations */
 
-int arr [8200];
+int * arr;
 
 
 
@@ -48,14 +48,19 @@ int arr [8200];
 
 
 void * bigger_number(void * arg){
+  cout << "inside the belly of the beast" << endl;
    pthread_arg * s = (pthread_arg *) arg;
-   int multiplier = s->multiplier;
-   if (arr[s->startIndex] < arr[multiplier*s->endIndex]){
-     arr[s->startIndex] = arr[multiplier*s->endIndex];
+   //int multiplier = s->multiplier;
+   cout << s->startIndex << "end " << s->endIndex << endl;
+   if (arr[s->startIndex] < arr[s->endIndex]){
+     cout << "here lol " << endl;
+     cout << arr[s->startIndex] << "next" << arr[s->endIndex] << endl;
+     arr[s->startIndex] = arr[s->endIndex];
   }
-   
+  cout << "here?" << endl;
+  cout << arr[s->startIndex] << endl;
   
-  
+  return 0;
 }
 
 
@@ -66,6 +71,7 @@ int main() {
     //Stardard in
     int count = 0;
     string s;
+    arr =  (int *) malloc(sizeof(int)*8200);
    // string input;
     bool cont = true;
     while (cont == true)
@@ -94,30 +100,39 @@ int main() {
     
     int log_count = count;
     int limit = 0;
-    void * dummy;
+    
     while(log_count >>= 1){
       limit++;
     }
-    
+    cout << "count is " << count << " limit is " << limit << endl;
     for(int i = 0; i < limit; i++){
-      
-      if (  i % (int) pow(2.0,(double)(i+1)) == 0.0){
-	arg[i].startIndex = i;
-	arg[i].endIndex = i + pow(2.0,(double)i);
-	arg[i].multiplier = i;
-	pthread_create(&tid[i], &attr,bigger_number,&arg[i]);
+      cout << "i equals " << i << endl;
+      for(int k = 0; k < count; k++){
+	
+	if (  k % (int) pow(2.0,(double)(i+1)) == 0.0){
+	  arg[k].startIndex = k;
+	  arg[k].endIndex = k + (int) pow(2.0,(double)i);
+	  cout << arg[k].startIndex << "This is the start index" << endl;
+	  //arg[i].multiplier = i;
+	  pthread_create(&tid[k], &attr,bigger_number,&arg[k]);
+	  cout << "something is wrong" << endl;
+	}
+	else{
+	  cout << "waiting" << endl;
+	}
+	//barrier
+	cout << "no way jose" << endl;
+	
       }
-      
-      //barrier
-      
-      
     }
+    cout << "what the heck? " << endl;
     
     for (int j = 0; j < count; j++){
       pthread_join(tid[j], NULL);
     }
     
-    cout << arr[0] << endl;
+      
+    cout << "the biggest element is " << arr[0] << endl;
     //initialize array of size p
     //pthread_t [8000];
     
