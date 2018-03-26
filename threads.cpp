@@ -34,17 +34,44 @@
 #include <sstream>
 #include <pthread.h>
 #include <math.h>
-
+#include <unistd.h>
+#include <semaphore.h>
 
 using namespace std;
 
 /* Global Declarations */
 
 int * arr;
+pthread_barrier_t mybarrier;
 
 
+class Barrier{
+  int value;
+  sem_t mutex(1);
+  sem_t waitq(0); //first time want to wait
+  sem_t throttle(0);
+  int init;  
+}
 
-
+void Barrier:: wait(){
+  mutex.wait();
+  value--;
+  if(value != 0){
+    mutex.signal();
+    waitq.signal();
+    throttle.signal();
+  }
+  
+  else{
+    for (int i = 0; i < init -1; i++){
+      waitq.signal();
+      throttle.wait();
+    }
+   value = init;
+   mutex.signal();
+  }
+  
+}
 
 
 void * bigger_number(void * arg){
@@ -58,10 +85,18 @@ void * bigger_number(void * arg){
      arr[s->startIndex] = arr[s->endIndex];
   }
   cout << "here?" << endl;
-  cout << arr[s->startIndex] << endl;
-  
+  cout << "resulting VALUE is " << arr[s->startIndex] << endl;
+  //pthread_barrier_wait(&mybarrier);
+  cout << "actually going!" << endl;
   return 0;
 }
+
+// void * fake(void * arg){
+//   cout << "fake doing nothing" << endl;
+//  // pthread_barrier_wait(&mybarrier);
+//   cout << "im going!" << endl;
+//   return 0;
+// }
 
 
 int main() {
@@ -92,42 +127,68 @@ int main() {
      
     }
     
-    pthread_t tid[count];
+    pthread_t tid[count /2];
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     
-    pthread_arg arg[count];
-    
+    pthread_arg arg[count / 2];
+    pthread_barrier_t mybarrier;
+    pthread_barrier_init(&mybarrier, NULL, (count /2) - 1);
     int log_count = count;
     int limit = 0;
     
     while(log_count >>= 1){
       limit++;
     }
+    
     cout << "count is " << count << " limit is " << limit << endl;
+    
+    cout << "----------------------------" << endl;
     for(int i = 0; i < limit; i++){
       cout << "i equals " << i << endl;
-      for(int k = 0; k < count; k++){
+      for(int k = 0; k < count / 2; k++){
 	
-	if (  k % (int) pow(2.0,(double)(i+1)) == 0.0){
-	  arg[k].startIndex = k;
-	  arg[k].endIndex = k + (int) pow(2.0,(double)i);
+	if (  (2*k) % (int) pow(2.0,(double)(i+1)) == 0.0){
+	  arg[k].startIndex = 2*k;
+	  arg[k].endIndex = 2*k + (int) pow(2.0,(double)i);
 	  cout << arg[k].startIndex << "This is the start index" << endl;
 	  //arg[i].multiplier = i;
-	  pthread_create(&tid[k], &attr,bigger_number,&arg[k]);
-	  cout << "something is wrong" << endl;
+	  if (i == 0){
+	    cout << "CREATING NEW THREAD" << endl;
+	    pthread_create(&tid[k], &attr,bigger_number,&arg[k]);
+	    cout << "something is wrong" << endl;
+	  }
+	  else{
+	    cout << "using same threads" << endl;
+	   bigger_number(&arg[k]); 
+	  }
 	}
+	
 	else{
-	  cout << "waiting" << endl;
+// 	  if (i == 0){
+// 	    cout << "CREATING NEW BAD THREAD" << endl;
+// 	    pthread_create(&tid[k], &attr,fake,&arg[k]);
+// 	    cout << "waiting" << endl;
+// 	  }
+// 	  
+// 	  else{
+// 	    cout << "using same dummy threads" << endl;
+// 	   fake(&arg[k]);
+// 	  }
+	  cout << "These threads arent doing anything" << endl;  
+	  
 	}
 	//barrier
+	usleep(3000000);
 	cout << "no way jose" << endl;
 	
       }
+     
+      
     }
     cout << "what the heck? " << endl;
     
-    for (int j = 0; j < count; j++){
+    for (int j = 0; j < count / 2; j++){
       pthread_join(tid[j], NULL);
     }
     
